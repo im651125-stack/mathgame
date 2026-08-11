@@ -24,7 +24,7 @@
         }
         /* HUD Glassmorphism */
         .hud-panel {
-            background: rgba(10, 20, 40, 0.65);
+            background: rgba(10, 20, 40, 0.75);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(0, 240, 255, 0.25);
             box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
@@ -60,7 +60,7 @@
             0% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
         }
-        /* Custom Glowing Scrollbars if needed */
+        /* Custom Glowing Scrollbars */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -112,6 +112,13 @@
                 <div id="score-val" class="text-3xl font-black text-cyan-300 font-orbitron tracking-wider drop-shadow-[0_0_8px_rgba(0,240,255,0.6)]">0000</div>
             </div>
             <div class="h-8 w-px bg-cyan-500/30"></div>
+            <div>
+                <div class="text-xs text-gray-400 font-orbitron tracking-wider">ACCURACY</div>
+                <div class="text-sm font-bold text-emerald-400 font-orbitron mt-1">
+                    <span id="hud-correct" class="text-emerald-400">0</span> 正 / <span id="hud-wrong" class="text-rose-400">0</span> 誤
+                </div>
+            </div>
+            <div class="h-8 w-px bg-cyan-500/30"></div>
             <div class="text-right">
                 <div class="text-xs text-gray-400 font-orbitron tracking-wider">WAVE</div>
                 <div id="wave-val" class="text-3xl font-black text-amber-400 font-orbitron tracking-wider drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]">1</div>
@@ -119,17 +126,24 @@
         </div>
     </div>
 
-    <!-- Controls & Status Overlay (Top Right) -->
-    <div class="absolute top-6 right-6 z-10 hud-panel p-3 px-4 rounded-xl border border-cyan-500/30 text-xs text-gray-300 font-orbitron flex items-center gap-4">
-        <div><span class="text-cyan-400 font-bold">WASD</span> 移動</div>
-        <div class="w-px h-4 bg-cyan-500/30"></div>
-        <div><span class="text-cyan-400 font-bold">滑鼠左鍵</span> 射擊</div>
-        <div class="w-px h-4 bg-cyan-500/30"></div>
-        <div><span class="text-cyan-400 font-bold">ESC</span> 解除視角鎖定</div>
+    <!-- Controls & Leaderboard Toggle (Top Right) -->
+    <div class="absolute top-6 right-6 z-10 flex items-center gap-3">
+        <div class="hud-panel p-3 px-4 rounded-xl border border-cyan-500/30 text-xs text-gray-300 font-orbitron flex items-center gap-4">
+            <div><span class="text-cyan-400 font-bold">WASD</span> 移動</div>
+            <div class="w-px h-4 bg-cyan-500/30"></div>
+            <div><span class="text-cyan-400 font-bold">滑鼠左鍵</span> 射擊</div>
+            <div class="w-px h-4 bg-cyan-500/30"></div>
+            <div><span class="text-cyan-400 font-bold">ESC</span> 解除視角</div>
+        </div>
+        
+        <button id="hud-leaderboard-btn" class="hud-panel px-4 py-3 rounded-xl border border-cyan-400/50 bg-cyan-500/10 hover:bg-cyan-500/30 text-cyan-300 hover:text-white font-orbitron text-xs font-bold tracking-wider transition-all flex items-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+            排行榜
+        </button>
     </div>
 
     <!-- Lock Pointer Prompt Banner when unlocked during game -->
-    <div id="unlock-prompt" class="hidden absolute bottom-12 left-1/2 -translate-x-1/2 z-20 hud-panel px-6 py-3 rounded-full border border-amber-400/50 text-amber-300 text-sm font-orbitron tracking-wider flex items-center gap-3 animate-bounce">
+    <div id="unlock-prompt" class="hidden absolute bottom-12 left-1/2 -translate-x-1/2 z-20 hud-panel px-6 py-3 rounded-full border border-amber-400/50 text-amber-300 text-sm font-orbitron tracking-wider flex items-center gap-3 animate-bounce cursor-pointer">
         <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
         點擊畫面重新鎖定準星與操作
     </div>
@@ -152,31 +166,39 @@
             </h1>
             <p class="text-gray-400 text-sm mb-6 font-orbitron tracking-widest">3D 數理防衛戰術模擬系統</p>
 
+            <!-- User Profile Input -->
+            <div class="mb-6 text-left">
+                <label for="player-name-input" class="block text-xs font-orbitron text-cyan-400 tracking-wider mb-2">指揮官代號 (USER NAME)</label>
+                <input id="player-name-input" type="text" maxlength="16" placeholder="請輸入您的代號 (預設: Commander)" class="w-full bg-slate-900/90 border border-cyan-500/40 rounded-xl px-4 py-3 text-cyan-200 font-orbitron focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 placeholder:text-gray-600 transition-all">
+            </div>
+
             <!-- Rules Box -->
-            <div class="bg-slate-900/80 p-5 rounded-xl border border-cyan-500/20 text-left text-sm text-gray-300 space-y-3 mb-8">
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-cyan-500/20 text-left text-sm text-gray-300 space-y-2.5 mb-6 max-h-48 overflow-y-auto">
                 <div class="flex items-start gap-3">
                     <span class="bg-cyan-500/20 text-cyan-400 p-1 rounded font-bold font-orbitron text-xs mt-0.5">01</span>
-                    <p><strong class="text-white">計算目標題目：</strong>入侵的數字機器人頭頂會顯示題目（例如：8 + 5 = ?）。</p>
+                    <p><strong class="text-white">計算目標題目：</strong>入侵機器人頭頂顯示題目（如：8 + 5 = ?）。</p>
                 </div>
                 <div class="flex items-start gap-3">
                     <span class="bg-cyan-500/20 text-cyan-400 p-1 rounded font-bold font-orbitron text-xs mt-0.5">02</span>
-                    <p><strong class="text-white">精準擊毀正確部位：</strong>機器人的 <span class="text-cyan-300 font-semibold">「胸口」、「左腿」、「右腿」</span> 印有解答。請使用槍枝瞄準並射擊帶有 <span class="text-emerald-400 font-bold">正確答案</span> 的部位！</p>
+                    <p><strong class="text-white">精準擊毀正確部位：</strong>機器人「胸口」、「左腿」、「右腿」印有解答。瞄準並射擊帶有 <span class="text-emerald-400 font-bold">正確答案</span> 的部位！</p>
                 </div>
                 <div class="flex items-start gap-3">
                     <span class="bg-amber-500/20 text-amber-400 p-1 rounded font-bold font-orbitron text-xs mt-0.5">03</span>
-                    <p><strong class="text-amber-300">警告與懲罰：</strong>若射擊錯誤部位，機器人將發狂並以 <span class="text-red-400 font-bold">極快速度</span> 衝向你！進入防衛線將會扣除護盾值。</p>
-                </div>
-                <div class="flex items-start gap-3">
-                    <span class="bg-purple-500/20 text-purple-400 p-1 rounded font-bold font-orbitron text-xs mt-0.5">04</span>
-                    <p><strong class="text-white">難度升級：</strong>每獲得 <span class="text-cyan-300 font-bold">500 分</span> 波次上升，敵軍推進速度加快、題目複雜度將大幅提升！</p>
+                    <p><strong class="text-amber-300">警告與懲罰：</strong>射擊錯誤部位會使機器人發狂並暴走！突破防衛線會扣除護盾。</p>
                 </div>
             </div>
 
-            <!-- Deploy Button -->
-            <button id="start-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-black font-orbitron tracking-widest text-lg shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer flex items-center justify-center gap-2">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                DEPLOY SYSTEM (開始戰鬥)
-            </button>
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-3 gap-3">
+                <button id="start-btn" class="col-span-2 py-4 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-black font-orbitron tracking-widest text-lg shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer flex items-center justify-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    DEPLOY SYSTEM
+                </button>
+                <button id="start-leaderboard-btn" class="col-span-1 py-4 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-cyan-500/40 text-cyan-300 font-bold font-orbitron text-sm tracking-wider transition-all cursor-pointer flex flex-col items-center justify-center gap-1">
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    排行榜
+                </button>
+            </div>
         </div>
     </div>
 
@@ -190,10 +212,10 @@
             <h1 class="text-4xl font-black text-red-500 font-orbitron tracking-wider mb-2 drop-shadow-[0_0_20px_rgba(255,0,60,0.8)]">
                 DEFENSE BREACHED
             </h1>
-            <p class="text-gray-400 text-sm mb-6 font-orbitron">基地護盾過載歸零，防禦失敗</p>
+            <p id="game-over-player-title" class="text-gray-400 text-sm mb-4 font-orbitron">基地護盾過載歸零，防禦失敗</p>
 
             <!-- Final Stats Panel -->
-            <div class="bg-slate-900/90 p-6 rounded-xl border border-red-500/20 mb-8 grid grid-cols-2 gap-4">
+            <div class="bg-slate-900/90 p-5 rounded-xl border border-red-500/20 mb-6 grid grid-cols-2 gap-3">
                 <div class="text-center p-3 bg-black/40 rounded-lg">
                     <div class="text-xs text-gray-400 font-orbitron">FINAL SCORE</div>
                     <div id="final-score" class="text-3xl font-black text-cyan-400 font-orbitron mt-1">0</div>
@@ -202,17 +224,220 @@
                     <div class="text-xs text-gray-400 font-orbitron">WAVE REACHED</div>
                     <div id="final-wave" class="text-3xl font-black text-amber-400 font-orbitron mt-1">1</div>
                 </div>
+                <div class="text-center p-2.5 bg-black/40 rounded-lg">
+                    <div class="text-xs text-gray-400 font-orbitron">答對題數</div>
+                    <div id="final-correct" class="text-xl font-black text-emerald-400 font-orbitron mt-1">0</div>
+                </div>
+                <div class="text-center p-2.5 bg-black/40 rounded-lg">
+                    <div class="text-xs text-gray-400 font-orbitron">答錯題數</div>
+                    <div id="final-wrong" class="text-xl font-black text-rose-400 font-orbitron mt-1">0</div>
+                </div>
             </div>
 
-            <button id="restart-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-black font-orbitron tracking-widest text-lg shadow-[0_0_30px_rgba(255,0,60,0.5)] transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer flex items-center justify-center gap-2">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                REBOOT SYSTEM (重置系統)
-            </button>
+            <div class="text-xs text-gray-500 font-orbitron mb-6 flex justify-between items-center px-2">
+                <span>遊戲開始時間:</span>
+                <span id="final-start-time" class="text-gray-300 font-mono">--</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <button id="restart-btn" class="col-span-2 py-4 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-black font-orbitron tracking-widest text-lg shadow-[0_0_30px_rgba(255,0,60,0.5)] transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer flex items-center justify-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    REBOOT
+                </button>
+                <button id="over-leaderboard-btn" class="col-span-1 py-4 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-amber-500/40 text-amber-300 font-bold font-orbitron text-sm tracking-wider transition-all cursor-pointer flex flex-col items-center justify-center gap-1">
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    排行榜
+                </button>
+            </div>
         </div>
     </div>
 
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="hidden absolute inset-0 z-40 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+        <div class="hud-panel max-w-2xl w-full p-6 md:p-8 rounded-2xl border-2 border-cyan-500/50 relative shadow-[0_0_50px_rgba(0,240,255,0.2)] flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-cyan-500/30">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-400/40 text-amber-400">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-cyan-300 font-orbitron tracking-wider">DEFENDER HALL OF FAME</h2>
+                        <p class="text-xs text-gray-400 font-orbitron">實時戰績雲端排行榜</p>
+                    </div>
+                </div>
+                <button id="close-leaderboard-btn" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-gray-300 hover:text-white transition-colors cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-y-auto flex-1 pr-1">
+                <table class="w-full text-left text-sm text-gray-300 font-orbitron border-collapse">
+                    <thead class="sticky top-0 bg-slate-900/90 text-cyan-400 text-xs border-b border-cyan-500/30 shadow-md">
+                        <tr>
+                            <th class="py-3 px-3"># 排名</th>
+                            <th class="py-3 px-3">指揮官名稱</th>
+                            <th class="py-3 px-3 text-center">開始時間</th>
+                            <th class="py-3 px-3 text-center">答對</th>
+                            <th class="py-3 px-3 text-center">答錯</th>
+                            <th class="py-3 px-3 text-right">得分</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-tbody" class="divide-y divide-slate-800">
+                        <!-- Dynamic Records rendered here -->
+                        <tr>
+                            <td colspan="6" class="text-center py-8 text-gray-500">
+                                載入排行榜資料中...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-cyan-500/20 text-right">
+                <button id="close-leaderboard-bottom-btn" class="px-6 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 font-orbitron text-xs font-bold transition-all cursor-pointer">
+                    關閉 (CLOSE)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Sandbox Module -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'math-defender-app';
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+
+        // Firebase Initialization
+        try {
+            const firebaseConfig = typeof __firebase_config !== 'undefined' 
+                ? JSON.parse(__firebase_config) 
+                : {
+                    apiKey: "demo-api-key",
+                    authDomain: "demo-app.firebaseapp.com",
+                    projectId: "demo-app",
+                    storageBucket: "demo-app.appspot.com",
+                    messagingSenderId: "123456789",
+                    appId: "1:123456789:web:demo"
+                };
+
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            const authenticateUser = async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (err) {
+                    console.warn("Auth token failed, falling back to anonymous auth:", err);
+                    try { await signInAnonymously(auth); } catch(e) {}
+                }
+            };
+
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+                if (user) {
+                    subscribeLeaderboard();
+                }
+            });
+
+            authenticateUser();
+        } catch (e) {
+            console.warn("Firebase initialization skipped or failed:", e);
+        }
+
+        // Save Record to Firestore
+        window.saveGameRecordToCloud = async function(recordData) {
+            if (!db || !currentUser) {
+                console.warn("Firestore not ready. Record local only.");
+                return;
+            }
+
+            try {
+                // RULE 1: STRICT PATH
+                const recordsRef = collection(db, 'artifacts', appId, 'public', 'data', 'math_defender_records');
+                await addDoc(recordsRef, {
+                    userName: recordData.userName,
+                    startTime: recordData.startTime,
+                    correctCount: recordData.correctCount,
+                    wrongCount: recordData.wrongCount,
+                    score: recordData.score,
+                    wave: recordData.wave,
+                    createdAt: new Date().toISOString()
+                });
+            } catch (err) {
+                console.error("Error saving game record to Firestore:", err);
+            }
+        };
+
+        // Subscribe to Leaderboard with realtime listener (RULE 2: Fetch all then sort in JS)
+        function subscribeLeaderboard() {
+            if (!db) return;
+            try {
+                const recordsRef = collection(db, 'artifacts', appId, 'public', 'data', 'math_defender_records');
+                
+                onSnapshot(recordsRef, (snapshot) => {
+                    const records = [];
+                    snapshot.forEach((doc) => {
+                        records.push(doc.data());
+                    });
+
+                    // Sort in memory (score desc, then correctCount desc)
+                    records.sort((a, b) => (b.score - a.score) || (b.correctCount - a.correctCount));
+
+                    renderLeaderboardTable(records);
+                }, (error) => {
+                    console.error("Leaderboard subscription error:", error);
+                });
+            } catch (err) {
+                console.error("Subscribe error:", err);
+            }
+        }
+
+        function renderLeaderboardTable(records) {
+            const tbody = document.getElementById('leaderboard-tbody');
+            if (!tbody) return;
+
+            if (records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500">尚無戰績記錄，快成為第一位戰鬥人員！</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = records.map((rec, idx) => {
+                let rankBadge = `${idx + 1}`;
+                if (idx === 0) rankBadge = `<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">🥇 1</span>`;
+                else if (idx === 1) rankBadge = `<span class="px-2 py-0.5 rounded bg-slate-300/20 text-slate-300 font-bold">🥈 2</span>`;
+                else if (idx === 2) rankBadge = `<span class="px-2 py-0.5 rounded bg-amber-700/20 text-amber-500 font-bold">🥉 3</span>`;
+
+                return `
+                    <tr class="hover:bg-cyan-500/10 transition-colors">
+                        <td class="py-3 px-3 font-bold">${rankBadge}</td>
+                        <td class="py-3 px-3 font-semibold text-cyan-200">${escapeHtml(rec.userName || '無名戰士')}</td>
+                        <td class="py-3 px-3 text-center text-xs text-gray-400 font-mono">${escapeHtml(rec.startTime || '--')}</td>
+                        <td class="py-3 px-3 text-center text-emerald-400 font-bold">${rec.correctCount || 0}</td>
+                        <td class="py-3 px-3 text-center text-rose-400 font-bold">${rec.wrongCount || 0}</td>
+                        <td class="py-3 px-3 text-right text-cyan-300 font-black text-base">${rec.score || 0}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+    </script>
+
     <script>
-        // Synthesized Audio Effects using Web Audio API (No external sound assets needed)
+        // Synthesized Audio Effects using Web Audio API
         class SoundSystem {
             constructor() {
                 this.ctx = null;
@@ -316,11 +541,15 @@
             score: 0,
             wave: 1,
             shield: 100,
-            spawnInterval: 4000, // Ms between spawns
+            spawnInterval: 4000,
             lastSpawnTime: 0,
-            speedMultiplier: 1.0,
             robots: [],
-            particles: []
+            particles: [],
+            // User stats tracking
+            userName: "Commander",
+            startTime: "",
+            correctCount: 0,
+            wrongCount: 0
         };
 
         // Player Controls & Movement Variables
@@ -392,7 +621,6 @@
             };
         }
 
-        // Dynamic Canvas Texture Generator
         function createTextCanvasTexture(text, width = 256, height = 256, isQuestion = false, highlightRed = false) {
             const canvas = document.createElement('canvas');
             canvas.width = width;
@@ -400,7 +628,6 @@
             const ctx = canvas.getContext('2d');
 
             if (isQuestion) {
-                // Futuristic Banner style
                 ctx.fillStyle = 'rgba(5, 15, 30, 0.9)';
                 ctx.fillRect(0, 0, width, height);
                 ctx.strokeStyle = '#00f0ff';
@@ -415,7 +642,6 @@
                 ctx.shadowBlur = 10;
                 ctx.fillText(text, width / 2, height / 2);
             } else {
-                // Body Part Answer Plate Style
                 ctx.fillStyle = highlightRed ? '#ff003c' : '#0a192f';
                 ctx.fillRect(0, 0, width, height);
                 
@@ -437,11 +663,10 @@
             return texture;
         }
 
-        // Three.js Core Initialization
+        // Three.js Scene Setup
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
 
-        // Dark sci-fi fog
         scene.background = new THREE.Color(0x050814);
         scene.fog = new THREE.FogExp2(0x050814, 0.018);
 
@@ -454,7 +679,7 @@
         renderer.shadowMap.enabled = true;
         container.appendChild(renderer.domElement);
 
-        // Lights
+        // Lighting
         const ambientLight = new THREE.AmbientLight(0x223355, 1.5);
         scene.add(ambientLight);
 
@@ -466,7 +691,7 @@
         pointLight.position.set(0, 10, -20);
         scene.add(pointLight);
 
-        // Floor Grid & Base Surface
+        // Floor Grid
         const gridHelper = new THREE.GridHelper(200, 100, 0x00f0ff, 0x003366);
         gridHelper.position.y = 0;
         scene.add(gridHelper);
@@ -481,7 +706,7 @@
         floor.rotation.x = -Math.PI / 2;
         scene.add(floor);
 
-        // Gun Model Assembly (Attached to Camera)
+        // Gun Model Assembly
         const gunGroup = new THREE.Group();
         const barrelGeo = new THREE.BoxGeometry(0.12, 0.14, 0.7);
         const gunMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.8, roughness: 0.2 });
@@ -494,16 +719,14 @@
 
         gunGroup.add(gunBarrel);
         gunGroup.add(gunAccent);
-        gunGroup.position.set(0.3, -0.25, -0.5); // Positioned lower right in screen space
+        gunGroup.position.set(0.3, -0.25, -0.5);
         camera.add(gunGroup);
         scene.add(camera);
 
-        // Muzzle Flash Light
         const muzzleLight = new THREE.PointLight(0x00f0ff, 0, 5);
         gunGroup.add(muzzleLight);
         muzzleLight.position.set(0, 0, -0.4);
 
-        // Particle Debris System for Robot Destruction
         class ParticleExplosion {
             constructor(pos) {
                 this.particles = [];
@@ -544,7 +767,7 @@
                         this.particles.splice(i, 1);
                     } else {
                         p.position.addScaledVector(p.velocity, delta);
-                        p.velocity.y -= 15 * delta; // Gravity
+                        p.velocity.y -= 15 * delta;
                         p.rotation.x += p.rotSpeed.x * delta;
                         p.rotation.y += p.rotSpeed.y * delta;
                         p.scale.setScalar(p.life);
@@ -553,7 +776,6 @@
             }
         }
 
-        // Robot Class
         class Robot {
             constructor(mathData, spawnZ) {
                 this.mathData = mathData;
@@ -562,26 +784,21 @@
                 this.currentSpeed = this.baseSpeed;
                 this.walkCycle = 0;
 
-                // Group container
                 this.group = new THREE.Group();
                 this.group.position.set((Math.random() - 0.5) * 24, 0, spawnZ);
 
-                // Build Robot Body Parts
                 this.buildRobotMesh();
-
                 scene.add(this.group);
             }
 
             buildRobotMesh() {
                 const darkMetal = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4, metalness: 0.6 });
-                const jointMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
 
-                // 1. Head
+                // Head
                 const headGeo = new THREE.BoxGeometry(1.2, 1.0, 1.0);
                 this.head = new THREE.Mesh(headGeo, darkMetal);
                 this.head.position.y = 3.6;
 
-                // Eyes glow
                 const eyeGeo = new THREE.BoxGeometry(0.8, 0.2, 0.2);
                 this.eyeMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 1 });
                 const eye = new THREE.Mesh(eyeGeo, this.eyeMat);
@@ -589,7 +806,7 @@
                 this.head.add(eye);
                 this.group.add(this.head);
 
-                // 2. Head Floating Math Problem Banner
+                // Math Question Banner
                 const questionTex = createTextCanvasTexture(this.mathData.question, 512, 128, true);
                 const bannerGeo = new THREE.PlaneGeometry(3.6, 0.9);
                 const bannerMat = new THREE.MeshBasicMaterial({ map: questionTex, transparent: true, side: THREE.DoubleSide });
@@ -597,7 +814,7 @@
                 this.banner.position.set(0, 4.8, 0);
                 this.group.add(this.banner);
 
-                // 3. Torso (Chest) -> Targetable Choice #1
+                // Torso (Chest) -> Targetable Option #1
                 const chestTex = createTextCanvasTexture(this.mathData.chest.val, 256, 256);
                 const chestGeo = new THREE.BoxGeometry(1.8, 2.0, 1.2);
                 this.chestMat = new THREE.MeshStandardMaterial({ map: chestTex, metalness: 0.3 });
@@ -606,7 +823,7 @@
                 this.chest.userData = { robot: this, choiceData: this.mathData.chest, partName: 'chest' };
                 this.group.add(this.chest);
 
-                // 4. Arms
+                // Arms
                 const armGeo = new THREE.BoxGeometry(0.5, 1.8, 0.5);
                 this.leftArm = new THREE.Mesh(armGeo, darkMetal);
                 this.leftArm.position.set(-1.3, 2.2, 0);
@@ -615,7 +832,7 @@
                 this.group.add(this.leftArm);
                 this.group.add(this.rightArm);
 
-                // 5. Left Leg -> Targetable Choice #2
+                // Left Leg -> Targetable Option #2
                 const leftLegTex = createTextCanvasTexture(this.mathData.leftLeg.val, 256, 256);
                 const legGeo = new THREE.BoxGeometry(0.7, 1.8, 0.7);
                 this.leftLegMat = new THREE.MeshStandardMaterial({ map: leftLegTex, metalness: 0.3 });
@@ -624,7 +841,7 @@
                 this.leftLeg.userData = { robot: this, choiceData: this.mathData.leftLeg, partName: 'leftLeg' };
                 this.group.add(this.leftLeg);
 
-                // 6. Right Leg -> Targetable Choice #3
+                // Right Leg -> Targetable Option #3
                 const rightLegTex = createTextCanvasTexture(this.mathData.rightLeg.val, 256, 256);
                 this.rightLegMat = new THREE.MeshStandardMaterial({ map: rightLegTex, metalness: 0.3 });
                 this.rightLeg = new THREE.Mesh(legGeo, this.rightLegMat);
@@ -633,40 +850,33 @@
                 this.group.add(this.rightLeg);
             }
 
-            // Set Enraged State when shot wrongly
             setEnraged() {
                 if (this.isEnraged) return;
                 this.isEnraged = true;
-                this.currentSpeed = this.baseSpeed * 2.8; // Fast penalty speed
+                this.currentSpeed = this.baseSpeed * 2.8;
 
-                // Flash Red Materials
                 this.eyeMat.color.setHex(0xff003c);
                 this.eyeMat.emissive.setHex(0xff003c);
 
-                // Re-draw textures red
                 this.chestMat.map = createTextCanvasTexture(this.mathData.chest.val, 256, 256, false, true);
                 this.leftLegMat.map = createTextCanvasTexture(this.mathData.leftLeg.val, 256, 256, false, true);
                 this.rightLegMat.map = createTextCanvasTexture(this.mathData.rightLeg.val, 256, 256, false, true);
             }
 
             update(delta) {
-                // Check Slow Zone (Z > -15)
                 let animSpeed = 8.0;
                 let moveFactor = 1.0;
 
                 if (!this.isEnraged && this.group.position.z > -15) {
-                    // Slowdown zone near player
                     moveFactor = 0.4;
                     animSpeed = 3.0;
                 } else if (this.isEnraged) {
                     animSpeed = 16.0;
                 }
 
-                // Move toward player (Z = 0)
                 const step = this.currentSpeed * moveFactor * delta;
                 this.group.position.z += step;
 
-                // Sine wave walking limb animation
                 this.walkCycle += delta * animSpeed;
                 const swing = Math.sin(this.walkCycle) * 0.45;
 
@@ -675,7 +885,6 @@
                 this.leftArm.rotation.x = -swing;
                 this.rightArm.rotation.x = swing;
 
-                // Make top math banner always face camera
                 this.banner.lookAt(camera.position);
             }
 
@@ -684,7 +893,6 @@
             }
         }
 
-        // Shooting & Raycaster Logic
         const raycaster = new THREE.Raycaster();
         let recoilTime = 0;
 
@@ -692,18 +900,13 @@
             if (!gameState.active) return;
 
             audioSys.playShoot();
-
-            // Gun Recoil Animation Trigger
             recoilTime = 0.12;
 
-            // Muzzle flash light
             muzzleLight.intensity = 4.0;
             setTimeout(() => { muzzleLight.intensity = 0; }, 50);
 
-            // Raycast from Camera Center (0, 0)
             raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
 
-            // Collect targetable meshes from all robots
             const targetMeshes = [];
             gameState.robots.forEach(r => {
                 targetMeshes.push(r.chest, r.leftLeg, r.rightLeg);
@@ -717,30 +920,36 @@
                 const robot = hitData.robot;
 
                 if (hitData.choiceData.isCorrect) {
-                    // CORRECT ANSWER HIT!
+                    // CORRECT ANSWER
                     audioSys.playHit();
                     gameState.particles.push(new ParticleExplosion(intersects[0].point));
-
-                    // Show Crosshair Success flash
                     showHitMarker(true);
 
-                    // Add score
+                    gameState.correctCount++;
+                    updateHUDAccuracy();
+
                     addScore(100);
 
-                    // Remove Robot
                     robot.destroy();
                     const index = gameState.robots.indexOf(robot);
                     if (index > -1) gameState.robots.splice(index, 1);
 
                 } else {
-                    // WRONG ANSWER HIT!
+                    // WRONG ANSWER
                     audioSys.playError();
                     showHitMarker(false);
 
-                    // Punish by enraging robot
+                    gameState.wrongCount++;
+                    updateHUDAccuracy();
+
                     robot.setEnraged();
                 }
             }
+        }
+
+        function updateHUDAccuracy() {
+            document.getElementById('hud-correct').innerText = gameState.correctCount;
+            document.getElementById('hud-wrong').innerText = gameState.wrongCount;
         }
 
         function showHitMarker(isCorrect) {
@@ -758,12 +967,10 @@
             gameState.score += pts;
             document.getElementById('score-val').innerText = gameState.score.toString().padStart(4, '0');
 
-            // Difficulty progression: Every 500 pts -> Wave Up
             const targetWave = Math.floor(gameState.score / 500) + 1;
             if (targetWave > gameState.wave) {
                 gameState.wave = targetWave;
                 document.getElementById('wave-val').innerText = gameState.wave;
-                // Shorten spawn interval
                 gameState.spawnInterval = Math.max(1800, 4000 - (gameState.wave - 1) * 500);
             }
         }
@@ -773,7 +980,6 @@
             document.getElementById('shield-text').innerText = `${gameState.shield}%`;
             document.getElementById('shield-bar').style.width = `${gameState.shield}%`;
 
-            // Screen flash red effect
             const overlay = document.getElementById('damage-overlay');
             overlay.style.opacity = '1';
             setTimeout(() => { overlay.style.opacity = '0'; }, 300);
@@ -785,10 +991,14 @@
             }
         }
 
-        // Pointer Lock & Mouse Look Controls
         let isPointerLocked = false;
 
         document.addEventListener('click', (e) => {
+            // Check if clicking modal or leaderboard buttons
+            if (e.target.closest('#start-screen') || e.target.closest('#game-over-screen') || e.target.closest('#leaderboard-modal') || e.target.closest('#hud-leaderboard-btn')) {
+                return;
+            }
+
             if (!gameState.active) return;
 
             if (!isPointerLocked) {
@@ -804,13 +1014,18 @@
                 document.getElementById('unlock-prompt').classList.add('hidden');
             } else {
                 isPointerLocked = false;
-                if (gameState.active) {
+                if (gameState.active && document.getElementById('leaderboard-modal').classList.contains('hidden')) {
                     document.getElementById('unlock-prompt').classList.remove('hidden');
                 }
             }
         });
 
-        // Mouse Rotation
+        document.getElementById('unlock-prompt').addEventListener('click', () => {
+            if (gameState.active) {
+                document.body.requestPointerLock();
+            }
+        });
+
         document.addEventListener('mousemove', (e) => {
             if (!isPointerLocked || !gameState.active) return;
 
@@ -818,11 +1033,9 @@
             player.yaw -= e.movementX * sensitivity;
             player.pitch -= e.movementY * sensitivity;
 
-            // Clamp pitch to prevent flip
             player.pitch = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, player.pitch));
         });
 
-        // Keyboard Controls
         window.addEventListener('keydown', (e) => {
             const k = e.key.toLowerCase();
             if (k === 'w') player.keys.w = true;
@@ -839,9 +1052,17 @@
             if (k === 'd') player.keys.d = false;
         });
 
-        // Game Lifecycle Functions
         function startGame() {
             audioSys.init();
+
+            // Read User Name
+            const nameInput = document.getElementById('player-name-input').value.trim();
+            gameState.userName = nameInput.length > 0 ? nameInput : "Commander";
+
+            // Record Start Time
+            const now = new Date();
+            const timeStr = `${now.getFullYear()}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+            gameState.startTime = timeStr;
 
             // Reset State
             gameState.active = true;
@@ -850,12 +1071,14 @@
             gameState.shield = 100;
             gameState.spawnInterval = 4000;
             gameState.lastSpawnTime = performance.now();
+            gameState.correctCount = 0;
+            gameState.wrongCount = 0;
 
             // Clear active robots
             gameState.robots.forEach(r => r.destroy());
             gameState.robots = [];
 
-            // Reset Player
+            // Reset Player Position
             player.position.set(0, 1.6, 0);
             player.yaw = 0;
             player.pitch = 0;
@@ -865,8 +1088,11 @@
             document.getElementById('wave-val').innerText = '1';
             document.getElementById('shield-text').innerText = '100%';
             document.getElementById('shield-bar').style.width = '100%';
+            updateHUDAccuracy();
+
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('leaderboard-modal').classList.add('hidden');
 
             document.body.requestPointerLock();
         }
@@ -875,23 +1101,56 @@
             gameState.active = false;
             if (document.exitPointerLock) document.exitPointerLock();
 
+            document.getElementById('game-over-player-title').innerText = `指揮官 [ ${gameState.userName} ] - 防禦失敗`;
             document.getElementById('final-score').innerText = gameState.score;
             document.getElementById('final-wave').innerText = gameState.wave;
+            document.getElementById('final-correct').innerText = gameState.correctCount;
+            document.getElementById('final-wrong').innerText = gameState.wrongCount;
+            document.getElementById('final-start-time').innerText = gameState.startTime || "--";
+
             document.getElementById('game-over-screen').classList.remove('hidden');
             document.getElementById('unlock-prompt').classList.add('hidden');
+
+            // Save user data to Firebase Sandbox
+            if (window.saveGameRecordToCloud) {
+                window.saveGameRecordToCloud({
+                    userName: gameState.userName,
+                    startTime: gameState.startTime,
+                    correctCount: gameState.correctCount,
+                    wrongCount: gameState.wrongCount,
+                    score: gameState.score,
+                    wave: gameState.wave
+                });
+            }
+        }
+
+        // Leaderboard Modal Handlers
+        function openLeaderboard() {
+            if (document.exitPointerLock) document.exitPointerLock();
+            document.getElementById('leaderboard-modal').classList.remove('hidden');
+        }
+
+        function closeLeaderboard() {
+            document.getElementById('leaderboard-modal').classList.add('hidden');
         }
 
         document.getElementById('start-btn').addEventListener('click', startGame);
         document.getElementById('restart-btn').addEventListener('click', startGame);
 
-        // Resize Listener
+        document.getElementById('hud-leaderboard-btn').addEventListener('click', openLeaderboard);
+        document.getElementById('start-leaderboard-btn').addEventListener('click', openLeaderboard);
+        document.getElementById('over-leaderboard-btn').addEventListener('click', openLeaderboard);
+
+        document.getElementById('close-leaderboard-btn').addEventListener('click', closeLeaderboard);
+        document.getElementById('close-leaderboard-bottom-btn').addEventListener('click', closeLeaderboard);
+
+        // Window Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Main Animation Render Loop
         let lastTime = performance.now();
 
         function animate() {
@@ -902,12 +1161,10 @@
             lastTime = now;
 
             if (gameState.active) {
-                // 1. Player Camera Rotation
                 camera.rotation.order = 'YXZ';
                 camera.rotation.y = player.yaw;
                 camera.rotation.x = player.pitch;
 
-                // 2. WASD Movement inside bound limits
                 const moveVec = new THREE.Vector3();
                 if (player.keys.w) moveVec.z -= 1;
                 if (player.keys.s) moveVec.z += 1;
@@ -918,12 +1175,10 @@
                 moveVec.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
 
                 player.position.addScaledVector(moveVec, player.moveSpeed * delta);
-                // Clamp Player within battlefield
                 player.position.x = Math.max(-12, Math.min(12, player.position.x));
                 player.position.z = Math.max(-4, Math.min(4, player.position.z));
                 camera.position.copy(player.position);
 
-                // 3. Gun Recoil Recovery
                 if (recoilTime > 0) {
                     recoilTime -= delta;
                     gunGroup.position.z = -0.5 + (recoilTime * 0.8);
@@ -933,7 +1188,7 @@
                     gunGroup.rotation.x = 0;
                 }
 
-                // 4. Enemy Spawner (Spawns at Z = -50 to -70)
+                // Enemy Spawner
                 if (now - gameState.lastSpawnTime > gameState.spawnInterval) {
                     const mathData = generateMathProblem(gameState.wave);
                     const spawnZ = -(Math.random() * 20 + 50);
@@ -942,12 +1197,11 @@
                     gameState.lastSpawnTime = now;
                 }
 
-                // 5. Update Robots
+                // Update Robots
                 for (let i = gameState.robots.length - 1; i >= 0; i--) {
                     const r = gameState.robots[i];
                     r.update(delta);
 
-                    // Check if reached player (Z > -2)
                     if (r.group.position.z > -2) {
                         takeShieldDamage(20);
                         r.destroy();
@@ -955,7 +1209,7 @@
                     }
                 }
 
-                // 6. Update Debris Particles
+                // Update Debris
                 for (let i = gameState.particles.length - 1; i >= 0; i--) {
                     gameState.particles[i].update(delta);
                     if (gameState.particles[i].particles.length === 0) {
@@ -967,7 +1221,6 @@
             renderer.render(scene, camera);
         }
 
-        // Start Loop on Window Load
         window.onload = () => {
             animate();
         };
